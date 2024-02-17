@@ -1,15 +1,13 @@
 package engine.core;
 
 public interface IGameLogic {
-    /**
-     * function used to configure the game class
-     */
     void init();
     void update();
-    void draw(Window window);
+    void draw();
+    void run();
 
     /**
-     * not recommended for the same key being pressed every frame as it does not do that
+     * not recommended for the same key being pressed every frame as it does not check that way
      */
     void keyCallback(long glfwWindow, int key, int scancode, int action, int mods);
 

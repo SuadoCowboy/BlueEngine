@@ -1,6 +1,7 @@
 package engine.test;
 
 import engine.core.IGameLogic;
+import engine.core.Launcher;
 import engine.core.Window;
 import engine.core.util.Utils;
 
@@ -13,11 +14,13 @@ public class Game implements IGameLogic {
     private double previousTime;
     private int frameCount;
 
-    @Override
     public void init() {
         window = new Window(350, 300, title, NULL);
         window.setClearColor(Utils.randomGLColor());
-        window.setvSync(true);
+        window.setvSync(false);
+
+        window.setKeyCallback(this);
+        window.setFramebufferSizeCallback(this);
 
         previousTime = glfwGetTime();
     }
@@ -47,8 +50,16 @@ public class Game implements IGameLogic {
     }
 
     @Override
-    public void draw(Window window) {
+    public void draw() {
+        window.clear();
+    }
 
+    @Override
+    public void run() {
+        while (!window.shouldClose()) {
+            update();
+            draw();
+        }
     }
 
     @Override
@@ -60,5 +71,9 @@ public class Game implements IGameLogic {
     @Override
     public Window getWindow() {
         return window;
+    }
+
+    public static void main(String[] args) {
+        Launcher.run(new Game());
     }
 }

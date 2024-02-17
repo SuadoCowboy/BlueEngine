@@ -18,8 +18,11 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class Window {
 
     private CharSequence title;
+
     private Vector2i size = new Vector2i(1,1);
+
     private long window;
+
     private boolean vSync;
 
     private Vector4f clearColor = new Vector4f(0,0,0,0);
@@ -32,7 +35,32 @@ public class Window {
      * @param monitor monitor to use. NULL for primary monitor
      */
     public Window(int width, int height, CharSequence title, long monitor) {
-        init(width, height, title, monitor);
+        // Configure GLFW
+        glfwDefaultWindowHints();
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
+
+        // Create the window
+        size.x = width;
+        size.y = height;
+        window = glfwCreateWindow(width, height, title, monitor, NULL);
+        if ( window == NULL )
+            throw new RuntimeException("Failed to create the GLFW window");
+
+        centerScreen();
+
+        // Make the OpenGL context current
+        glfwMakeContextCurrent(window);
+
+        // Make the window visible
+        glfwShowWindow(window);
+
+        // This line is critical for LWJGL's interoperation with GLFW's
+        // OpenGL context, or any context that is managed externally.
+        // LWJGL detects the context that is current in the current thread,
+        // creates the GLCapabilities instance and makes the OpenGL
+        // bindings available for use.
+        GL.createCapabilities();
     }
 
     public void setPosition(Vector2i position) {
@@ -64,34 +92,6 @@ public class Window {
                     (vidmode.height() - pHeight.get(0)) / 2
             );
         } // the stack frame is popped automatically
-    }
-
-    public void init(int width, int height, CharSequence title, long monitor) {
-        // Configure GLFW
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
-
-        // Create the window
-        size.x = width;
-        size.y = height;
-        window = glfwCreateWindow(width, height, title, monitor, NULL);
-        if ( window == NULL )
-            throw new RuntimeException("Failed to create the GLFW window");
-
-        centerScreen();
-
-        // Make the OpenGL context current
-        glfwMakeContextCurrent(window);
-
-        // Make the window visible
-        glfwShowWindow(window);
-
-        // This line is critical for LWJGL's interoperation with GLFW's
-        // OpenGL context, or any context that is managed externally.
-        // LWJGL detects the context that is current in the current thread,
-        // creates the GLCapabilities instance and makes the OpenGL
-        // bindings available for use.
-        GL.createCapabilities();
     }
 
     /**
@@ -197,6 +197,7 @@ public class Window {
 
         GL11.glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     }
+
     public void setClearColor(Vector4f clearColor) {
         setClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
     }
