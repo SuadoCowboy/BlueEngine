@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Engine {
+
     static public void init() {
         System.out.println("LWJGL Version: " + Version.getVersion());
 

@@ -27,6 +27,8 @@ public class Window {
 
     private Vector4f clearColor = new Vector4f(0,0,0,0);
 
+    IGameLogic gameLogic;
+
     /**
      *
      * @param width width of window
@@ -34,7 +36,9 @@ public class Window {
      * @param title title of window
      * @param monitor monitor to use. NULL for primary monitor
      */
-    public Window(int width, int height, CharSequence title, long monitor) {
+    public Window(IGameLogic gameLogic, int width, int height, CharSequence title, long monitor) {
+        this.gameLogic = gameLogic;
+
         // Configure GLFW
         glfwDefaultWindowHints();
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // the window will stay hidden after creation
@@ -51,6 +55,9 @@ public class Window {
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
+
+        glfwSetKeyCallback(window, this::keyCallback);
+        glfwSetFramebufferSizeCallback(window, this::framebufferSizeCallback);
 
         // Make the window visible
         glfwShowWindow(window);
@@ -111,15 +118,21 @@ public class Window {
         glfwDestroyWindow(window);
     }
 
-    public void setKeyCallback(IGameLogic gameLogic) {
-        glfwSetKeyCallback(window, gameLogic::keyCallback);
+    private void keyCallback(long glfwWindow, int key, int scancode, int action, int mods) {
+        gameLogic.keyCallback(key, scancode, action, mods);
     }
 
     /**
      * DO NOT forget to put updateViewport at the end of your framebuffer size callback!
      */
-    public void setFramebufferSizeCallback(IGameLogic gameLogic) {
-        glfwSetFramebufferSizeCallback(window, gameLogic::framebufferSizeCallback);
+    public void framebufferSizeCallback(long glfwWindow, int width, int height) {
+        updateViewport();
+        clear();
+        gameLogic.framebufferSizeCallback();
+    }
+
+    public boolean isKeyPressed(int key) {
+        return glfwGetKey(window, key) == GLFW_PRESS;
     }
 
     public boolean shouldClose() {

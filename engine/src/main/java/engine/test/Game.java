@@ -1,7 +1,8 @@
 package engine.test;
 
 import engine.core.IGameLogic;
-import engine.core.Launcher;
+import engine.core.Engine;
+import engine.core.TickTime;
 import engine.core.Window;
 import engine.core.util.Utils;
 
@@ -9,43 +10,45 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Game implements IGameLogic {
-    private Window window;
     private final String title = "BlueEngine - Hello World Window";
-    private double previousTime;
-    private int frameCount;
+    private final Window window;
+    private long lastSecond;
+    int ticks = 0;
 
-    public void init() {
-        window = new Window(350, 300, title, NULL);
+    public Game() {
+        window = new Window(this, 400, 300, title, NULL);
         window.setClearColor(Utils.randomGLColor());
         window.setvSync(false);
 
-        window.setKeyCallback(this);
-        window.setFramebufferSizeCallback(this);
-
-        previousTime = glfwGetTime();
+        lastSecond = System.currentTimeMillis();
     }
 
     @Override
-    public void keyCallback(long glfwWindow, int key, int scancode, int action, int mods) {
-        if (action == GLFW_RELEASE) {
-            if (key == GLFW_KEY_ESCAPE)
-                window.setShouldClose(true);
+    public void keyCallback(int key, int scancode, int action, int mods) {
 
-            else if (key == GLFW_KEY_W) {
-                window.setClearColor(Utils.randomGLColor());
-            }
-        }
     }
 
     @Override
     public void update() {
-        double currentTime = glfwGetTime();
-        frameCount++;
+        if (window.isKeyPressed(GLFW_KEY_W)) { // it's changing alot of times in only 1 second, but the changes only appear after 5 ticks a second.
+            window.setClearColor(Utils.randomGLColor());
+        }
+    }
 
-        if (currentTime - previousTime >= 1.0) {
-            window.setTitle(title + " - FPS: " + frameCount);
-            frameCount = 0;
-            previousTime = currentTime;
+    @Override
+    public void updateInTick() {
+        ticks++;
+
+        if (window.isKeyPressed(GLFW_KEY_S)) { // it's changing 5 ticks a second
+            window.setClearColor(Utils.randomGLColor());
+        }
+
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - lastSecond >= 1000) {
+            double ticksPerSecond = (double) ticks / ((double) (currentTime - lastSecond) / 1000.0);
+            window.setTitle(title + " - TPS: " + ticks);
+            ticks = 0;
+            lastSecond = currentTime;
         }
     }
 
@@ -56,24 +59,35 @@ public class Game implements IGameLogic {
 
     @Override
     public void run() {
+        TickTime tickTime = new TickTime(5.0); // 5 ticks per second
+
         while (!window.shouldClose()) {
             update();
-            draw();
+            if (tickTime.shouldTick()) {
+                updateInTick();
+                draw();
+            }
         }
     }
 
     @Override
-    public void framebufferSizeCallback(long glfwWindow, int width, int height) {
-        window.updateViewport();
-        window.clear();
+    public void framebufferSizeCallback() {
+
     }
 
     @Override
-    public Window getWindow() {
-        return window;
+    public void terminate() {
+        window.terminate();
     }
 
     public static void main(String[] args) {
-        Launcher.run(new Game());
+        Engine.init();
+
+        Game game = new Game();
+
+        game.run();
+
+        game.terminate();
+        Engine.terminate();
     }
 }
