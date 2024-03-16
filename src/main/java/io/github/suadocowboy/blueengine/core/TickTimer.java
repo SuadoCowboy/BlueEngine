@@ -3,11 +3,11 @@ package io.github.suadocowboy.blueengine.core;
 import java.time.Duration;
 import java.time.Instant;
 
-public class TickTime {
+public class TickTimer {
     private Duration timePerTick;
     private Instant lastTickTime;
 
-    public TickTime(double tickRate) {
+    public TickTimer(double tickRate) {
         setTickRate(tickRate);
         lastTickTime = Instant.now();
     }
