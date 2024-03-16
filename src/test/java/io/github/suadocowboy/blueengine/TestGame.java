@@ -1,21 +1,25 @@
-package engine.test;
+package io.github.suadocowboy.blueengine;
 
-import engine.core.IGameLogic;
-import engine.core.Engine;
-import engine.core.TickTime;
-import engine.core.Window;
-import engine.core.util.Utils;
+import io.github.suadocowboy.blueengine.core.IGameLogic;
+import io.github.suadocowboy.blueengine.core.Engine;
+import io.github.suadocowboy.blueengine.core.TickTime;
+import io.github.suadocowboy.blueengine.core.Window;
+import io.github.suadocowboy.blueengine.core.util.Utils;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
-public class Game implements IGameLogic {
+public class TestGame implements IGameLogic {
     private final String title = "BlueEngine - Hello World Window";
     private final Window window;
     private long lastSecond;
     int ticks = 0;
+    double tickRate = 20.0;
 
-    public Game() {
+    public TestGame() {
         window = new Window(this, 400, 300, title, NULL);
         window.setClearColor(Utils.randomGLColor());
         window.setvSync(false);
@@ -33,20 +37,21 @@ public class Game implements IGameLogic {
         if (window.isKeyPressed(GLFW_KEY_W)) { // it's changing alot of times in only 1 second, but the changes only appear after 5 ticks a second.
             window.setClearColor(Utils.randomGLColor());
         }
+
     }
 
     @Override
     public void updateInTick() {
         ticks++;
 
-        if (window.isKeyPressed(GLFW_KEY_S)) { // it's changing 5 ticks a second
+        if (window.isKeyPressed(GLFW_KEY_S)) {
             window.setClearColor(Utils.randomGLColor());
         }
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSecond >= 1000) {
-            double ticksPerSecond = (double) ticks / ((double) (currentTime - lastSecond) / 1000.0);
-            window.setTitle(title + " - TPS: " + ticks);
+            int ticksPerSecond = (int) ((double) ticks / ((double) (currentTime - lastSecond) / 1000.0));
+            window.setTitle(title + " - TPS: " + ticksPerSecond);
             ticks = 0;
             lastSecond = currentTime;
         }
@@ -59,7 +64,7 @@ public class Game implements IGameLogic {
 
     @Override
     public void run() {
-        TickTime tickTime = new TickTime(5.0); // 5 ticks per second
+        TickTime tickTime = new TickTime(tickRate); // 5 ticks per second
 
         while (!window.shouldClose()) {
             update();
@@ -80,14 +85,19 @@ public class Game implements IGameLogic {
         window.terminate();
     }
 
-    public static void main(String[] args) {
+    @BeforeAll
+    public static void init() {
         Engine.init();
+    }
 
-        Game game = new Game();
+    @Test
+    public void testGame() {
+        run();
+        terminate();
+    }
 
-        game.run();
-
-        game.terminate();
+    @AfterAll
+    public static void terminateEngine() {
         Engine.terminate();
     }
 }
