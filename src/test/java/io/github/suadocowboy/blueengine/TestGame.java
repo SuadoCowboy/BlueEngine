@@ -2,7 +2,7 @@ package io.github.suadocowboy.blueengine;
 
 import io.github.suadocowboy.blueengine.core.IGameLogic;
 import io.github.suadocowboy.blueengine.core.Engine;
-import io.github.suadocowboy.blueengine.core.TickTime;
+import io.github.suadocowboy.blueengine.core.TickTimer;
 import io.github.suadocowboy.blueengine.core.Window;
 import io.github.suadocowboy.blueengine.core.util.Utils;
 import org.junit.jupiter.api.AfterAll;
@@ -34,7 +34,7 @@ public class TestGame implements IGameLogic {
 
     @Override
     public void update() {
-        if (window.isKeyPressed(GLFW_KEY_W)) { // it's changing alot of times in only 1 second, but the changes only appear after 5 ticks a second.
+        if (window.isKeyPressed(GLFW_KEY_W)) { // it's changing alot of times in only 1 second, but the changes only appear after x ticks a second.
             window.setClearColor(Utils.randomGLColor());
         }
 
@@ -64,14 +64,15 @@ public class TestGame implements IGameLogic {
 
     @Override
     public void run() {
-        TickTime tickTime = new TickTime(tickRate); // 5 ticks per second
+        TickTimer tickTimer = new TickTimer(tickRate);
 
         while (!window.shouldClose()) {
             update();
-            if (tickTime.shouldTick()) {
+            if (tickTimer.shouldTick()) {
                 updateInTick();
-                draw();
             }
+
+            draw();
         }
     }
 
