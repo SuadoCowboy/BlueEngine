@@ -1,4 +1,4 @@
-package engine.core;
+package io.github.suadocowboy.blueengine.core;
 
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;

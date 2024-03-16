@@ -1,4 +1,4 @@
-package engine.core;
+package io.github.suadocowboy.blueengine.core;
 
 public interface IGameLogic {
     void update();

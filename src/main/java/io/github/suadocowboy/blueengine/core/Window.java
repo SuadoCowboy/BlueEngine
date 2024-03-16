@@ -1,4 +1,4 @@
-package engine.core;
+package io.github.suadocowboy.blueengine.core;
 
 import org.joml.Vector2i;
 import org.joml.Vector4f;

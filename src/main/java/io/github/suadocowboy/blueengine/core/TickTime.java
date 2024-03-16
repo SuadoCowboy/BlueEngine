@@ -1,4 +1,4 @@
-package engine.core;
+package io.github.suadocowboy.blueengine.core;
 
 import java.time.Duration;
 import java.time.Instant;
