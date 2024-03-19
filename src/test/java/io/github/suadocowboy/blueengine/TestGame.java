@@ -1,28 +1,49 @@
 package io.github.suadocowboy.blueengine;
 
-import io.github.suadocowboy.blueengine.core.IGameLogic;
 import io.github.suadocowboy.blueengine.core.Engine;
+import io.github.suadocowboy.blueengine.core.IGameLogic;
 import io.github.suadocowboy.blueengine.core.TickTimer;
 import io.github.suadocowboy.blueengine.core.Window;
+import io.github.suadocowboy.blueengine.core.graphics.Mesh2D;
+import io.github.suadocowboy.blueengine.core.shader.ShaderProgram;
 import io.github.suadocowboy.blueengine.core.util.Utils;
+import org.joml.Vector4f;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class TestGame implements IGameLogic {
-    private final String title = "BlueEngine - Hello World Window";
+    private final String title = "BlueEngine - Our First Triangle!";
     private final Window window;
     private long lastSecond;
+    private final ShaderProgram shaderProgram;
+    private final Mesh2D triangle;
     int ticks = 0;
     double tickRate = 20.0;
 
-    public TestGame() {
+    public TestGame() throws Exception {
         window = new Window(this, 400, 300, title, NULL);
-        window.setClearColor(Utils.randomGLColor());
+        window.setClearColor(new Vector4f(0.2f, 0.5f, 0.7f, 1.0f));
         window.setvSync(false);
+
+        shaderProgram = new ShaderProgram();
+        shaderProgram.createVertexShader(Utils.readFile(getClass().getClassLoader().getResource("shaders/vertex.vert").getPath()));
+        shaderProgram.createFragmentShader(Utils.readFile(getClass().getClassLoader().getResource("shaders/fragment.frag").getPath()));
+        shaderProgram.link();
+        shaderProgram.bind();
+
+        float[] vertices = {
+                0.0f, 0.5f, 0.0f,
+                -0.5f, -0.5f, 0.0f,
+                0.5f, -0.5f, 0.0f
+        };
+
+        triangle = new Mesh2D(vertices);
 
         lastSecond = System.currentTimeMillis();
     }
@@ -34,10 +55,8 @@ public class TestGame implements IGameLogic {
 
     @Override
     public void update() {
-        if (window.isKeyPressed(GLFW_KEY_W)) { // it's changing alot of times in only 1 second, but the changes only appear after x ticks a second.
+        if (window.isKeyPressed(GLFW_KEY_W)) // it's changing alot of times in only 1 second, but the changes only appear after x ticks a second.
             window.setClearColor(Utils.randomGLColor());
-        }
-
     }
 
     @Override
@@ -60,6 +79,17 @@ public class TestGame implements IGameLogic {
     @Override
     public void draw() {
         window.clear();
+
+        shaderProgram.bind();
+        glBindVertexArray(triangle.getVaoId());
+
+        glDrawArrays(GL_TRIANGLES, 0, triangle.getVertexCount());
+
+        glBindVertexArray(0);
+
+        shaderProgram.unbind();
+
+        window.update();
     }
 
     @Override
@@ -83,6 +113,8 @@ public class TestGame implements IGameLogic {
 
     @Override
     public void terminate() {
+        shaderProgram.terminate();
+        triangle.terminate();
         window.terminate();
     }
 
