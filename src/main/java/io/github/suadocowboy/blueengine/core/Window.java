@@ -48,16 +48,19 @@ public class Window {
         size.x = width;
         size.y = height;
         window = glfwCreateWindow(width, height, title, monitor, NULL);
-        if ( window == NULL )
+        if ( window == NULL ) {
+            glfwTerminate();
             throw new RuntimeException("Failed to create the GLFW window");
+        }
 
         centerScreen();
 
-        // Make the OpenGL context current
-        glfwMakeContextCurrent(window);
 
         glfwSetKeyCallback(window, this::keyCallback);
         glfwSetFramebufferSizeCallback(window, this::framebufferSizeCallback);
+
+        // Make the OpenGL context current
+        glfwMakeContextCurrent(window);
 
         // Make the window visible
         glfwShowWindow(window);
@@ -106,8 +109,11 @@ public class Window {
      */
     public void clear() {
         GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+    }
+
+    public void update() {
         glfwSwapBuffers(window);
-        glfwPollEvents(); // should this be on clear function? i don't see why i should create a update method just to add this line of code instead of just using clear method
+        glfwPollEvents();
     }
 
     /**
