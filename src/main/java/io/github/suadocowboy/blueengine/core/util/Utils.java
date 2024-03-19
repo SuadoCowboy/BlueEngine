@@ -3,7 +3,9 @@ package io.github.suadocowboy.blueengine.core.util;
 import org.joml.Vector4f;
 import org.joml.Vector4i;
 
+import java.io.File;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Utils {
     static public final Random random = new Random();
@@ -14,6 +16,24 @@ public class Utils {
 
     static public float randomFloat(float min, float max) {
         return random.nextFloat(max - min) + min;
+    }
+
+    static public String readFile(String filePath) throws Exception {
+        File file = new File(filePath);
+
+        if (!file.isFile())
+            throw new Exception("Error reading file: it does not exists or is not a file.");
+
+        StringBuilder data = new StringBuilder();
+
+        Scanner scanner = new Scanner(file);
+        while (scanner.hasNextLine())
+            data.append(scanner.nextLine()).append('\n');
+
+        if (!data.isEmpty())
+            data.deleteCharAt(data.length()-1);
+
+        return data.toString();
     }
 
     static public Vector4i randomColor() {
