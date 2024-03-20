@@ -41,18 +41,10 @@ public class Mesh2D {
 
     public void draw() {
         shader.bind();
-        glBindVertexArray(getVaoId());
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+        glBindVertexArray(vaoId);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indicesVboId);
 
         glDrawElements(GL_TRIANGLES, indicesLength, GL_UNSIGNED_INT, 0);
-    }
-
-    public int getVaoId() {
-        return vaoId;
-    }
-
-    public int getIndicesLength() {
-        return indicesLength;
     }
 
     public void terminate() {
