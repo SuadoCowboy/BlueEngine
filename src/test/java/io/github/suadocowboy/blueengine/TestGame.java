@@ -12,8 +12,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class TestGame implements IGameLogic {
@@ -36,12 +35,15 @@ public class TestGame implements IGameLogic {
         shaderProgram.link();
         shaderProgram.bind();
 
+        shaderProgram.createUniform("projectionMatrix");
+
         float[] positions = new float[]{
-                -0.5f,  0.5f, 0.0f,
-                -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f,
-                0.5f,  0.5f, 0.0f,
+                -0.5f,  0.5f, -1.5f,
+                -0.5f, -0.5f, -1.5f,
+                 0.5f, -0.5f, -1.5f,
+                 0.5f,  0.5f, -1.5f,
         };
+
         int[] indices = new int[]{
                 0, 1, 3,
                 3, 1, 2,
@@ -49,27 +51,37 @@ public class TestGame implements IGameLogic {
 
         triangle = new Mesh2D(positions, indices, shaderProgram);
 
+        float[] colors = new float[]{
+                0.5f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f,
+                0.0f, 0.0f, 0.5f,
+                0.0f, 0.5f, 0.5f,
+        };
+
+        triangle.createAttribute(1, 3, colors);
+
         lastSecond = System.currentTimeMillis();
     }
 
     @Override
     public void keyCallback(int key, int scancode, int action, int mods) {
-
+        if (key == GLFW_KEY_G && action == GLFW_PRESS)
+            System.out.println("FOV: " + (int)Math.toDegrees(window.getFieldOfView()) + "º");
     }
 
     @Override
     public void update() {
-        if (window.isKeyPressed(GLFW_KEY_W)) // it's changing alot of times in only 1 second, but the changes only appear after x ticks a second.
-            window.setClearColor(Utils.randomGLColor());
     }
 
     @Override
     public void updateInTick() {
         ticks++;
 
-        if (window.isKeyPressed(GLFW_KEY_S)) {
-            window.setClearColor(Utils.randomGLColor());
-        }
+        if (window.isKeyPressed(GLFW_KEY_W))
+            window.setFieldOfView(window.getFieldOfView()+(float)Math.toRadians(1));
+
+        if (window.isKeyPressed(GLFW_KEY_S))
+            window.setFieldOfView(window.getFieldOfView()-(float)Math.toRadians(1));
 
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastSecond >= 1000) {
@@ -84,6 +96,7 @@ public class TestGame implements IGameLogic {
     public void draw() {
         window.clear();
 
+        shaderProgram.setUniform("projectionMatrix", window.getProjectionMatrix());
         triangle.draw();
 
         window.update();
