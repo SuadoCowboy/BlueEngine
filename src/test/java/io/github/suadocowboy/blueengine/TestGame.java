@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
-import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class TestGame implements IGameLogic {
@@ -37,13 +36,18 @@ public class TestGame implements IGameLogic {
         shaderProgram.link();
         shaderProgram.bind();
 
-        float[] vertices = {
-                0.0f, 0.5f, 0.0f,
+        float[] positions = new float[]{
+                -0.5f,  0.5f, 0.0f,
                 -0.5f, -0.5f, 0.0f,
-                0.5f, -0.5f, 0.0f
+                0.5f, -0.5f, 0.0f,
+                0.5f,  0.5f, 0.0f,
+        };
+        int[] indices = new int[]{
+                0, 1, 3,
+                3, 1, 2,
         };
 
-        triangle = new Mesh2D(vertices);
+        triangle = new Mesh2D(positions, indices, shaderProgram);
 
         lastSecond = System.currentTimeMillis();
     }
@@ -80,14 +84,7 @@ public class TestGame implements IGameLogic {
     public void draw() {
         window.clear();
 
-        shaderProgram.bind();
-        glBindVertexArray(triangle.getVaoId());
-
-        glDrawArrays(GL_TRIANGLES, 0, triangle.getVertexCount());
-
-        glBindVertexArray(0);
-
-        shaderProgram.unbind();
+        triangle.draw();
 
         window.update();
     }
