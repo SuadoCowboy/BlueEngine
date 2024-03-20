@@ -1,5 +1,6 @@
 package io.github.suadocowboy.blueengine.core;
 
+import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -19,7 +20,7 @@ public class Window {
 
     private CharSequence title;
 
-    private Vector2i size = new Vector2i(1,1);
+    private Vector2i size;
 
     private long window;
 
@@ -28,6 +29,17 @@ public class Window {
     private Vector4f clearColor = new Vector4f(0,0,0,0);
 
     IGameLogic gameLogic;
+
+    /**
+     * Field of View in Radians
+     */
+    private static float fieldOfView = (float) Math.toRadians(60.0f);
+
+    private static final float Z_NEAR = 0.01f;
+
+    private static final float Z_FAR = 1000.f;
+
+    private Matrix4f projectionMatrix;
 
     /**
      *
@@ -45,8 +57,7 @@ public class Window {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        size.x = width;
-        size.y = height;
+        size = new Vector2i(width, height);
         window = glfwCreateWindow(width, height, title, monitor, NULL);
         if ( window == NULL ) {
             glfwTerminate();
@@ -71,6 +82,15 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+    }
+
+    public Matrix4f getProjectionMatrix() {
+        float aspectRatio = (float) size.x / size.y;
+
+        projectionMatrix = new Matrix4f().perspective(fieldOfView, aspectRatio,
+                Z_NEAR, Z_FAR);
+
+        return projectionMatrix;
     }
 
     public void setPosition(Vector2i position) {
@@ -219,5 +239,13 @@ public class Window {
 
     public void setClearColor(Vector4f clearColor) {
         setClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+    }
+
+    public void setFieldOfView(float radians) {
+        fieldOfView = radians;
+    }
+
+    public float getFieldOfView() {
+        return fieldOfView;
     }
 }
