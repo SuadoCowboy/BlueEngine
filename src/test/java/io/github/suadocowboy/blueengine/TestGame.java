@@ -1,7 +1,7 @@
 package io.github.suadocowboy.blueengine;
 
 import io.github.suadocowboy.blueengine.core.*;
-import io.github.suadocowboy.blueengine.core.graphics.Mesh2D;
+import io.github.suadocowboy.blueengine.core.graphics.Mesh;
 import io.github.suadocowboy.blueengine.core.shader.ShaderProgram;
 import io.github.suadocowboy.blueengine.core.util.Utils;
 import org.joml.Matrix4f;
@@ -11,22 +11,18 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class TestGame implements IGameLogic {
-    private final String title = "BlueEngine - Our First Triangle!";
+    private final String title = "BlueEngine - Our First Colored Cube!";
     private final Window window;
     private long lastSecond;
     private final ShaderProgram shaderProgram;
     private int ticks = 0;
     private final double tickRate = 20.0;
-
-    private final List<Entity> entities;
-    private int changeX, changeY, changeZ = 0;
+    private final Entity entity;
+    private float scaleIncremental = 1;
 
     public TestGame() throws Exception {
         window = new Window(this, 400, 300, title, NULL);
@@ -42,21 +38,53 @@ public class TestGame implements IGameLogic {
         shaderProgram.createUniform("projectionMatrix");
         shaderProgram.createUniform("worldMatrix");
 
-        float[] positions = new float[]{
-                -0.5f,  0.5f, -1.5f,
-                -0.5f, -0.5f, -1.5f,
-                 0.5f, -0.5f, -1.5f,
-                 0.5f,  0.5f, -1.5f,
+        entity = createCubeEntity();
+
+        lastSecond = System.currentTimeMillis();
+    }
+
+    private Entity createCubeEntity() {
+        float[] positions = new float[] {
+                // VO
+                -0.5f,  0.5f,  0.5f,
+                // V1
+                -0.5f, -0.5f,  0.5f,
+                // V2
+                0.5f, -0.5f,  0.5f,
+                // V3
+                0.5f,  0.5f,  0.5f,
+                // V4
+                -0.5f,  0.5f, -0.5f,
+                // V5
+                0.5f,  0.5f, -0.5f,
+                // V6
+                -0.5f, -0.5f, -0.5f,
+                // V7
+                0.5f, -0.5f, -0.5f,
         };
 
-        int[] indices = new int[]{
-                0, 1, 3,
-                3, 1, 2,
+        int[] indices = new int[] {
+                // Front face
+                0, 1, 3, 3, 1, 2,
+                // Top Face
+                4, 0, 3, 5, 4, 3,
+                // Right face
+                3, 2, 7, 5, 3, 7,
+                // Left face
+                6, 1, 0, 6, 0, 4,
+                // Bottom face
+                2, 1, 6, 2, 6, 7,
+                // Back face
+                7, 6, 4, 7, 4, 5,
         };
 
-        Mesh2D rectangle = new Mesh2D(positions, indices, shaderProgram);
+        Mesh rectangle = new Mesh(positions, indices, shaderProgram);
 
         float[] colors = new float[]{
+                0.5f, 0.0f, 0.0f,
+                0.0f, 0.5f, 0.0f,
+                0.0f, 0.0f, 0.5f,
+                0.0f, 0.5f, 0.5f,
                 0.5f, 0.0f, 0.0f,
                 0.0f, 0.5f, 0.0f,
                 0.0f, 0.0f, 0.5f,
@@ -64,29 +92,11 @@ public class TestGame implements IGameLogic {
         };
 
         rectangle.createAttribute(1, 3, colors);
-
-        entities = new ArrayList<>();
-        entities.add(new Entity(rectangle));
-
-        lastSecond = System.currentTimeMillis();
+        return new Entity(rectangle);
     }
 
     @Override
     public void keyCallback(int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-            changeX = changeX == 1? 0 : 1;
-            System.out.println("X: " + changeX);
-        }
-
-        if (key == GLFW_KEY_Y && action == GLFW_PRESS) {
-            changeY = changeY == 1? 0 : 1;
-            System.out.println("Y: " + changeY);
-        }
-
-        if (key == GLFW_KEY_Z && action == GLFW_PRESS) {
-            changeZ = changeZ == 1? 0 : 1;
-            System.out.println("Z: " + changeZ);
-        }
     }
 
     @Override
@@ -97,31 +107,28 @@ public class TestGame implements IGameLogic {
     public void updateInTick() {
         ticks++;
 
-        Entity entity = entities.get(0);
+        float rotation = entity.getRotation().x + 1.5f;
+        if (rotation > 360)
+            rotation = 0;
+
+        entity.setRotation(rotation, rotation, rotation);
+
+        float scale = entity.getScale();
+        if (scale > 2.00f || scale < 0.05f)
+            scaleIncremental *= -1;
+
+        entity.setScale(scale+0.05f*scaleIncremental);
 
         Vector3f position = entity.getPosition();
-        Vector3f rotation = entity.getRotation();
+        if (window.isKeyPressed(GLFW_KEY_W))
+            entity.setPosition(position.x, position.y, position.z+0.1f);
+        if (window.isKeyPressed(GLFW_KEY_S))
+            entity.setPosition(position.x, position.y, position.z-0.1f);
 
-        if (window.isKeyPressed(GLFW_KEY_W)) {
-            entity.setPosition(position.x + changeX * 0.1f, position.y + changeY * 0.1f, position.z + changeZ * 0.1f);
-        }
-
-        if (window.isKeyPressed(GLFW_KEY_S)) {
-            entity.setPosition(position.x - changeX * 0.1f, position.y - changeY * 0.1f, position.z - changeZ * 0.1f);
-        }
-
-        if (window.isKeyPressed(GLFW_KEY_Q))
-            entity.setScale(entity.getScale()-0.5f);
-
-        if (window.isKeyPressed(GLFW_KEY_E))
-            entity.setScale(entity.getScale()+0.5f);
-
-        if (window.isKeyPressed(GLFW_KEY_A)) {
-            entity.setRotation(rotation.x - changeX, rotation.y - changeY, rotation.z - changeZ);
-        }
-
-        if (window.isKeyPressed(GLFW_KEY_D)) {
-            entity.setRotation(rotation.x + changeX, rotation.y + changeY, rotation.z + changeZ);
+        if (window.isKeyPressed(GLFW_KEY_R)) {
+            entity.setScale(1);
+            entity.setPosition(0, 0, 0);
+            entity.setRotation(0, 0, 0);
         }
 
         long currentTime = System.currentTimeMillis();
@@ -139,16 +146,14 @@ public class TestGame implements IGameLogic {
 
         shaderProgram.setUniform("projectionMatrix", window.getProjectionMatrix());
 
-        for (Entity entity : entities) {
-            Matrix4f worldMatrix = window.transformation.getWorldMatrix(
-                    entity.getPosition(),
-                    entity.getRotation(),
-                    entity.getScale()
-            );
+        Matrix4f worldMatrix = window.transformation.getWorldMatrix(
+                entity.getPosition(),
+                entity.getRotation(),
+                entity.getScale()
+        );
 
-            shaderProgram.setUniform("worldMatrix", worldMatrix);
-            entity.getMesh().draw();
-        }
+        shaderProgram.setUniform("worldMatrix", worldMatrix);
+        entity.getMesh().draw();
 
         window.update();
     }
@@ -175,13 +180,7 @@ public class TestGame implements IGameLogic {
     @Override
     public void terminate() {
         shaderProgram.terminate();
-
-        for (Entity entity : entities) {
-            entity.getMesh().terminate();
-        }
-
-        entities.clear();
-
+        entity.getMesh().terminate();
         window.terminate();
     }
 
