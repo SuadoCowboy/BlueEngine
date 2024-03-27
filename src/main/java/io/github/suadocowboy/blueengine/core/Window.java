@@ -1,5 +1,6 @@
 package io.github.suadocowboy.blueengine.core;
 
+import io.github.suadocowboy.blueengine.core.graphics.Transformation;
 import org.joml.Matrix4f;
 import org.joml.Vector2i;
 import org.joml.Vector4f;
@@ -16,13 +17,19 @@ import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+/**
+ * This is not just a common OpenGL window class. It stores transformation matrix, gameLogic and other things
+ */
 public class Window {
 
     private CharSequence title;
 
     private Vector2i size;
 
-    private long window;
+    /**
+     * The opengl window
+     */
+    private final long window;
 
     private boolean vSync;
 
@@ -34,15 +41,11 @@ public class Window {
      * Field of View in Radians
      */
     private static float fieldOfView = (float) Math.toRadians(60.0f);
-
     private static final float Z_NEAR = 0.01f;
-
     private static final float Z_FAR = 1000.f;
-
-    private Matrix4f projectionMatrix;
+    public final Transformation transformation;
 
     /**
-     *
      * @param width width of window
      * @param height height of window
      * @param title title of window
@@ -82,15 +85,12 @@ public class Window {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+
+        transformation = new Transformation();
     }
 
     public Matrix4f getProjectionMatrix() {
-        float aspectRatio = (float) size.x / size.y;
-
-        projectionMatrix = new Matrix4f().perspective(fieldOfView, aspectRatio,
-                Z_NEAR, Z_FAR);
-
-        return projectionMatrix;
+        return transformation.getProjectionMatrix(fieldOfView, size.x, size.y, Z_NEAR, Z_FAR);
     }
 
     public void setPosition(Vector2i position) {
