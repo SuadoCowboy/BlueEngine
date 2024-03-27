@@ -1,16 +1,16 @@
 package io.github.suadocowboy.blueengine.core;
 
-import io.github.suadocowboy.blueengine.core.graphics.Mesh2D;
+import io.github.suadocowboy.blueengine.core.graphics.Mesh;
 import org.joml.Vector3f;
 
 public class Entity {
-    private final Mesh2D mesh;
+    private final Mesh mesh;
 
     private final Vector3f position;
     private float scale;
     private final Vector3f rotation;
 
-    public Entity(Mesh2D mesh) {
+    public Entity(Mesh mesh) {
         this.mesh = mesh;
 
         position = new Vector3f(0, 0, 0);
@@ -46,7 +46,7 @@ public class Entity {
         this.rotation.z = z;
     }
 
-    public Mesh2D getMesh() {
+    public Mesh getMesh() {
         return mesh;
     }
 }

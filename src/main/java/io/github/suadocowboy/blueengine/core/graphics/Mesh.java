@@ -8,7 +8,7 @@ import java.util.List;
 
 import static org.lwjgl.opengl.GL30.*;
 
-public class Mesh2D {
+public class Mesh {
 
     private final int vaoId;
 
@@ -22,7 +22,7 @@ public class Mesh2D {
     private float scale;
     private final Vector3f rotation;
 
-    public Mesh2D(float[] positions, int[] indices, ShaderProgram shader) {
+    public Mesh(float[] positions, int[] indices, ShaderProgram shader) {
         indicesLength = indices.length;
 
         VBOs = new ArrayList<>();
