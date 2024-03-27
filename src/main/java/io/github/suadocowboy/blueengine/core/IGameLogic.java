@@ -4,7 +4,7 @@ public interface IGameLogic {
     void update();
 
     /**
-     * should only be updated using tickRate logic
+     * should only be updated using tick rate logic
      */
     void updateInTick();
     void draw();
@@ -12,7 +12,7 @@ public interface IGameLogic {
     void terminate();
 
     /**
-     * not recommended for the same key being pressed every frame as it does not check that way
+     * should be used for when key is pressed ONCE and not if it's still being held every frame
      */
     void keyCallback(int key, int scancode, int action, int mods);
 
